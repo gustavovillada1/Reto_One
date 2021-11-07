@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Reto_One</string>
+
+    <string name="icon_nav_profile">Perfil</string>
+    <string name="icon_nav_calendar">Publicaciones</string>
+    <string name="icon_nav_map">Mapa</string>
+    <string name="marker_detail_latlng">(%1$.2f,%2$.2f</string>
+
+</resources>
