@@ -54,6 +54,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
     private CardView cv_horario_evento;
     private ImageView img_evento_negocio;
 
+    private Publicacion event;
+
+    private boolean isRecyclerClicked;
 
     Animation login;
 
@@ -124,6 +127,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
      */
     private void cargarDatosSharedPreferences(){
 
+        if(isRecyclerClicked){
+            colocarMarcador(event);
+            return;
+        }
+
         SharedPreferences preferences = requireContext().getSharedPreferences("SerializacionJSON", Context.MODE_PRIVATE);
         String jsonPublicaciones = preferences.getString("publicaciones","");
 
@@ -151,6 +159,17 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
         }
     }
 
+    private void colocarMarcador(Publicacion p){
+
+        LatLng ubication = new LatLng(p.getLat(), p.getLng());
+        markerDraw = mMap.addMarker(new MarkerOptions()
+                .position(ubication)
+                .title(p.getNombreNegocio())
+                .snippet(p.getNombreEvento())
+                .draggable(true)
+        );
+    }
+
     private String[] obtenerHorariosEvento(String nEvento_nNegocio){
         String[] horarios = {"No","No",""};
         for(int i=0;i<this.publicaciones.size();i++){
@@ -176,6 +195,14 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
         cv_horario_evento=(CardView) view.findViewById(R.id.cv_horario_evento);
         img_evento_negocio = (ImageView) view.findViewById(R.id.img_evento_negocio);
 
+        Bundle evento = getArguments();
+        if(evento!=null) {
+            isRecyclerClicked=true;
+            event = (Publicacion) evento.getSerializable("Evento");
+        }else {
+            isRecyclerClicked=false;
+        }
+
         return view;
     }
 
@@ -186,6 +213,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
                 .findFragmentById(R.id.mapF2);
         mapFragment.getMapAsync(this);
+
+
 
     }
 

@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.reto_one.AdaptadorPublicacion;
+import com.example.reto_one.MainActivity;
 import com.example.reto_one.R;
 import com.example.reto_one.RegistrarNegocioActivity;
 import com.example.reto_one.RegistrarPublicacionActivity;
@@ -41,7 +42,6 @@ public class CalendarFragment extends Fragment {
     private AdaptadorPublicacion adaptadorPublicacion;
     private ImageButton btn_regresar_pub;
     private FloatingActionButton floatingActionButton;
-    private ProgressBar progressBarPublicaciones;
 
     private Negocio negocio;
 
@@ -166,27 +166,25 @@ public class CalendarFragment extends Fragment {
      * Método encargado de cargar los datos del shared preferences.
      */
     private void cargarDatosSharedPreferences(){
-                            SharedPreferences preferences = requireContext().getSharedPreferences("SerializacionJSON",Context.MODE_PRIVATE);
-                            String jsonNegocioActual = preferences.getString("negocioActual","");
-                            String jsonPublicaciones = preferences.getString("publicaciones","");
+        SharedPreferences preferences = requireContext().getSharedPreferences("SerializacionJSON",Context.MODE_PRIVATE);
+        String jsonNegocioActual = preferences.getString("negocioActual","");
+        String jsonPublicaciones = preferences.getString("publicaciones","");
 
-                            if(!jsonNegocioActual.equals("")){
+        if(!jsonNegocioActual.equals("")){
 
-                                Gson gson = new Gson();
-                                this.negocio = gson.fromJson(jsonNegocioActual, Negocio.class);
+            Gson gson = new Gson();
+            this.negocio = gson.fromJson(jsonNegocioActual, Negocio.class);
 
-                            }
+        }
+        if(!jsonPublicaciones.equals("")) {
+            Gson gson = new Gson();
+            Publicaciones p = gson.fromJson(jsonPublicaciones, Publicaciones.class);
+            for(Publicacion publicacion: p.getPublicaciones()){
+                adaptadorPublicacion.addEvento(publicacion);
+            }
+        }
 
-                            if(!jsonPublicaciones.equals("")) {
-                                Gson gson = new Gson();
-                                Publicaciones p = gson.fromJson(jsonPublicaciones, Publicaciones.class);
-                                for(Publicacion publicacion: p.getPublicaciones()){
-                                    adaptadorPublicacion.addEvento(publicacion);
-                                }
-                            }
-                            llenarPublicaciones();
-
-
+        llenarPublicaciones();
     }
 
     /**
@@ -226,7 +224,18 @@ public class CalendarFragment extends Fragment {
         adaptadorPublicacion.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //  AQUI SE METE EL CODIGO PARA CUANDO DEN CLICK EN EL ITEM
+                MapsFragment fr=new MapsFragment();
+                Bundle bundle = new Bundle();
+                int position = recycler_publicaciones.getChildAdapterPosition(v);
+                bundle.putSerializable("Evento",adaptadorPublicacion.getPublicaciones().get(position));
+                fr.setArguments(bundle);
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.frame_container,fr)
+                        .addToBackStack(null)
+                        .commit();
+
+
+
             }
         });
         recycler_publicaciones.setAdapter(adaptadorPublicacion);
