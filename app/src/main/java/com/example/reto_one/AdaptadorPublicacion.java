@@ -20,12 +20,23 @@ import java.util.ArrayList;
     private  View.OnClickListener listener;
     private Context c;
 
-    public AdaptadorPublicacion(ArrayList<Publicacion> publicaciones, Context c) {
-        this.publicaciones = publicaciones;
+    public AdaptadorPublicacion( Context c) {
+        this.publicaciones = new ArrayList<>();
         this.c=c;
     }
 
-    @NonNull
+    public void addEvento(Publicacion p){
+        this.publicaciones.add(p);
+        notifyItemInserted(this.publicaciones.size()-1);
+    }
+
+     public ArrayList<Publicacion> getPublicaciones() {
+         return publicaciones;
+     }
+
+
+
+     @NonNull
     @Override
     public ViewHolderPublicacion onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
        View view= LayoutInflater.from(parent.getContext()).inflate(R.layout.item_list_publicaciones,null,false);

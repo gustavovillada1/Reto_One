@@ -38,11 +38,11 @@ public class CalendarFragment extends Fragment {
 
     private CardView cv_no_publicaciones, cv_crear_publicacion;
     private RecyclerView recycler_publicaciones;
+    private AdaptadorPublicacion adaptadorPublicacion;
     private ImageButton btn_regresar_pub;
     private FloatingActionButton floatingActionButton;
     private ProgressBar progressBarPublicaciones;
 
-    private ArrayList<Publicacion> publicaciones;
     private Negocio negocio;
 
     private boolean cargandoDatosShared ;
@@ -64,12 +64,9 @@ public class CalendarFragment extends Fragment {
 
         cv_crear_publicacion=(CardView) view.findViewById(R.id.cv_crear_publicacion);
         cv_no_publicaciones=(CardView) view.findViewById(R.id.cv_no_publicaciones);
-        progressBarPublicaciones=(ProgressBar) view.findViewById(R.id.progressBarPublicaciones);
 
-        publicaciones= new ArrayList<>();
         recycler_publicaciones=(RecyclerView) view.findViewById(R.id.recycler_publicaciones);
-        recycler_publicaciones.setLayoutManager(new LinearLayoutManager(getContext()));
-
+        configurateRecycler();
         btn_regresar_pub=(ImageButton) view.findViewById(R.id.btn_regresar_pub);
         floatingActionButton=(FloatingActionButton) view.findViewById(R.id.floatingActionButton);
         floatingActionButton.setVisibility(View.GONE);
@@ -110,7 +107,7 @@ public class CalendarFragment extends Fragment {
             }
         });
 
-        cargarDatosSharedPreferencesThread();
+        cargarDatosSharedPreferences();
 
         return view;
     }
@@ -136,18 +133,22 @@ public class CalendarFragment extends Fragment {
                             }
 
                             if(!jsonPublicaciones.equals("")){
+                                Thread.sleep(500);
+
                                 Gson gson =  new Gson();
                                 Publicaciones p = gson.fromJson(jsonPublicaciones,Publicaciones.class);
-                                this.publicaciones = p.getPublicaciones();
-                                Thread.sleep(500);
-                                getActivity().runOnUiThread(
+                                 for(Publicacion publicacion: p.getPublicaciones()){
+                                     adaptadorPublicacion.addEvento(publicacion);
+                                 }
 
-                                        ()->{
-                                            llenarPublicaciones();
-                                            cargandoDatosShared=false;
-                                        }
-                                );
                             }
+                            getActivity().runOnUiThread(
+
+                                    ()->{
+                                        llenarPublicaciones();
+                                        cargandoDatosShared=false;
+                                    }
+                            );
                         }catch (Exception e){
 
                             e.printStackTrace();
@@ -179,11 +180,12 @@ public class CalendarFragment extends Fragment {
                             if(!jsonPublicaciones.equals("")) {
                                 Gson gson = new Gson();
                                 Publicaciones p = gson.fromJson(jsonPublicaciones, Publicaciones.class);
-                                this.publicaciones = p.getPublicaciones();
-
-                                llenarPublicaciones();
-
+                                for(Publicacion publicacion: p.getPublicaciones()){
+                                    adaptadorPublicacion.addEvento(publicacion);
+                                }
                             }
+                            llenarPublicaciones();
+
 
     }
 
@@ -191,9 +193,9 @@ public class CalendarFragment extends Fragment {
      * Método encargado de guardar los datos de las publicaciones que hayan en ese momento en el fragment, en un shared preferences.
      */
     private void guardarDatosSharedPreferences(){
-        if(!this.publicaciones.isEmpty()){
+        if(!adaptadorPublicacion.getPublicaciones().isEmpty()){
             Gson gson = new Gson();
-            Publicaciones p = new Publicaciones(this.publicaciones);
+            Publicaciones p = new Publicaciones(adaptadorPublicacion.getPublicaciones());
             String json = gson.toJson(p);
 
             SharedPreferences preferences = requireContext().getSharedPreferences("SerializacionJSON", Context.MODE_PRIVATE);
@@ -202,34 +204,25 @@ public class CalendarFragment extends Fragment {
     }
 
     /**
-     * Método para cargar el recyclerview
+     * Método para
      */
     private void llenarPublicaciones() {
 
-        new Thread(
-                ()->{
-                    try {
-                        Thread.sleep(500);
-                    }catch (Exception e){
-
-                    }
-                }
-        ).start();
-
-        if(publicaciones.isEmpty()){
+        if(adaptadorPublicacion.getPublicaciones().isEmpty()){
             cv_no_publicaciones.setVisibility(View.VISIBLE);
             cv_crear_publicacion.setVisibility(View.VISIBLE);
-            progressBarPublicaciones.setVisibility(View.GONE);
             return;
         }else {
             cv_no_publicaciones.setVisibility(View.GONE);
             cv_crear_publicacion.setVisibility(View.GONE);
             floatingActionButton.setVisibility(View.VISIBLE);
-            progressBarPublicaciones.setVisibility(View.GONE);
         }
 
-        AdaptadorPublicacion adaptadorPublicacion=new AdaptadorPublicacion(publicaciones,getContext());
+    }
 
+    public void configurateRecycler(){
+        recycler_publicaciones.setLayoutManager(new LinearLayoutManager(getContext()));
+        adaptadorPublicacion=new AdaptadorPublicacion(getContext());
         adaptadorPublicacion.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -248,9 +241,7 @@ public class CalendarFragment extends Fragment {
         if(result.getResultCode() == -1){
 
             Publicacion p = (Publicacion) result.getData().getExtras().getSerializable("Publicacion");
-            this.publicaciones.add(p);
-            Toast.makeText(getContext(),publicaciones.size()+" <- tamaño", Toast.LENGTH_SHORT).show();
-
+            adaptadorPublicacion.addEvento(p);
             llenarPublicaciones();
         }
     }

@@ -27,19 +27,12 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <ProgressBar
-                    android:id="@+id/progressBarPublicaciones"
-                    style="?android:attr/progressBarStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="250dp" />
-
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cv_no_publicaciones"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="15dp"
-                    android:visibility="gone"
+                    android:visibility="visible"
                     app:cardCornerRadius="10dp"
                     app:cardElevation="5dp">
 
@@ -75,7 +68,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="15dp"
-                    android:visibility="gone"
+                    android:visibility="visible"
                     app:cardBackgroundColor="#303F9F"
                     app:cardCornerRadius="10dp"
                     app:cardElevation="5dp">

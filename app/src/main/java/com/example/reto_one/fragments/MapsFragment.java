@@ -54,7 +54,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
     private CardView cv_horario_evento;
     private ImageView img_evento_negocio;
 
-    private boolean cargandoShared;
 
     Animation login;
 
@@ -124,33 +123,17 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
      * Método encargado de cargar los datos del shared preferences.
      */
     private void cargarDatosSharedPreferences(){
-        cargandoShared=true;
 
-        new Thread(
-                ()->{
-                    try {
-                        SharedPreferences preferences = requireContext().getSharedPreferences("SerializacionJSON", Context.MODE_PRIVATE);
-                        String jsonPublicaciones = preferences.getString("publicaciones","");
+        SharedPreferences preferences = requireContext().getSharedPreferences("SerializacionJSON", Context.MODE_PRIVATE);
+        String jsonPublicaciones = preferences.getString("publicaciones","");
 
+        if(!jsonPublicaciones.equals("")) {
+            Gson gson = new Gson();
+            Publicaciones p = gson.fromJson(jsonPublicaciones, Publicaciones.class);
+            this.publicaciones = p.getPublicaciones();
 
-                        if(!jsonPublicaciones.equals("")) {
-                            Gson gson = new Gson();
-                            Publicaciones p = gson.fromJson(jsonPublicaciones, Publicaciones.class);
-                            this.publicaciones = p.getPublicaciones();
-
-                            Thread.sleep(200);
-                            getActivity().runOnUiThread(
-                                    ()->{
-                                        colocarMarcadores();
-                                    }
-                            );
-                            cargandoShared=false;
-                        }
-                    }catch (Exception e){
-
-                    }
-                }
-        ).start();
+            colocarMarcadores();
+        }
     }
 
     private void colocarMarcadores() {

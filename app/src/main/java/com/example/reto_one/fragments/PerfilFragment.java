@@ -16,7 +16,6 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult;
-import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
@@ -145,7 +144,7 @@ public class PerfilFragment extends Fragment {
         super.onResume();
     }
 
-    private void cargarDatosSharedPreferences(){
+    private void cargarDatosSharedPreferencesThread(){
         cargandoDatosShared=true;
         new Thread(
                 ()->{
@@ -180,6 +179,11 @@ public class PerfilFragment extends Fragment {
                                             cargandoDatosShared=false;
                                         }
                                 );
+                            }else {
+                                getActivity().runOnUiThread(()->{
+                                    progressBarPerfil.setVisibility(View.GONE);
+                                    cargandoDatosShared=false;
+                                });
                             }
                         }
                     }catch (Exception e){
@@ -192,5 +196,38 @@ public class PerfilFragment extends Fragment {
 
     }
 
+
+    private void cargarDatosSharedPreferences(){
+
+        SharedPreferences preferences = requireContext().getSharedPreferences("SerializacionJSON", Context.MODE_PRIVATE);
+        String json = preferences.getString("negocioActual", "");
+        if (!json.equals("")) {
+
+            Gson gson = new Gson();
+            this.negocio = gson.fromJson(json, Negocio.class);
+
+            if(!negocio.getFoto().equals("")){
+                foto_negocio = Uri.parse(negocio.getFoto());
+                tv_nombre_negocio_main.setText(negocio.getNombre());
+                tv_descripcion_negocio_main.setText(negocio.getDescripcion());
+                img_foto_negocio_main.setImageURI(foto_negocio);
+
+            }else{
+                tv_nombre_negocio_main.setText("Negocio por defecto");
+                tv_descripcion_negocio_main.setText("Inserte aquí una descripción apropiada para su negocio. El autor de las publicaciones que haga el fragmento \"publicaciones\" será negocio que se registre en este fragment.");
+                img_foto_negocio_main.setImageResource(R.drawable.ic_baseline_camera_alt_24);
+                tv_ninguna_imagen.setVisibility(View.GONE);
+
+            }
+            progressBarPerfil.setVisibility(View.GONE);
+            cargandoDatosShared=false;
+
+        }else {
+            progressBarPerfil.setVisibility(View.GONE);
+            cargandoDatosShared=false;
+        }
+
+
+    }
 
 }
