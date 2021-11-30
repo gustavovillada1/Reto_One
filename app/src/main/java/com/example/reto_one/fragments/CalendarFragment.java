@@ -145,7 +145,7 @@ public class CalendarFragment extends Fragment {
                             getActivity().runOnUiThread(
 
                                     ()->{
-                                        llenarPublicaciones();
+                                        adaptAddButtons();
                                         cargandoDatosShared=false;
                                     }
                             );
@@ -184,7 +184,7 @@ public class CalendarFragment extends Fragment {
             }
         }
 
-        llenarPublicaciones();
+        adaptAddButtons();
     }
 
     /**
@@ -202,9 +202,9 @@ public class CalendarFragment extends Fragment {
     }
 
     /**
-     * Método para
+     * Método para colocar visible el boton flotante si ya hay eventos agregados.
      */
-    private void llenarPublicaciones() {
+    private void adaptAddButtons() {
 
         if(adaptadorPublicacion.getPublicaciones().isEmpty()){
             cv_no_publicaciones.setVisibility(View.VISIBLE);
@@ -218,6 +218,9 @@ public class CalendarFragment extends Fragment {
 
     }
 
+    /**
+     * Metodo encargado de configurar el recyclerview con su respectivo adapter y el evento que se realiza al darle click a un item del recycler.
+     */
     public void configurateRecycler(){
         recycler_publicaciones.setLayoutManager(new LinearLayoutManager(getContext()));
         adaptadorPublicacion=new AdaptadorPublicacion(getContext());
@@ -234,8 +237,6 @@ public class CalendarFragment extends Fragment {
                         .addToBackStack(null)
                         .commit();
 
-
-
             }
         });
         recycler_publicaciones.setAdapter(adaptadorPublicacion);
@@ -251,7 +252,7 @@ public class CalendarFragment extends Fragment {
 
             Publicacion p = (Publicacion) result.getData().getExtras().getSerializable("Publicacion");
             adaptadorPublicacion.addEvento(p);
-            llenarPublicaciones();
+            adaptAddButtons();
         }
     }
 
